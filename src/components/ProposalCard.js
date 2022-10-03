@@ -13,11 +13,15 @@ const states = {
     7: "Executed",
 };
 
-const proposals = [
+const initialProposals = [
     {
         id: "44782053061302158253479573181125706781099996506491438126989206048620935604903",
         proposer: "Bramsurya",
         description: "Should we make a new motorcycle?",
+        againstVotes: "0",
+        forVotes: "0",
+        abstainVotes: "0",
+        state: "Loading...",
     },
     // {
     //     id: 2,
@@ -27,28 +31,37 @@ const proposals = [
 ];
 
 function ProposalCard({ contract }) {
-    const [againstVotes, setAgainstVotes] = useState(0);
-    const [forVotes, setForVotes] = useState(0);
-    const [abstainVotes, setAbstainVotes] = useState(0);
-    const [state, setState] = useState("");
+    // const [againstVotes, setAgainstVotes] = useState(0);
+    // const [forVotes, setForVotes] = useState(0);
+    // const [abstainVotes, setAbstainVotes] = useState(0);
+    // const [state, setState] = useState("");
+    const [proposals, setProposals] = useState(initialProposals);
 
-    const proposalId = "44782053061302158253479573181125706781099996506491438126989206048620935604903";
+    // const proposalId = "44782053061302158253479573181125706781099996506491438126989206048620935604903";
 
     console.log(contract);
 
     async function getProposalDetails() {
         try {
-            const { againstVotes, forVotes, abstainVotes } = await contract.proposalVotes(
-                ethers.BigNumber.from(proposalId)
-            );
-            const state = await contract.state(ethers.BigNumber.from(proposalId));
+            const newProposals = [...proposals];
+            for (let idx in newProposals) {
+                let proposalId = newProposals[idx].id;
+                const { againstVotes, forVotes, abstainVotes } = await contract.proposalVotes(
+                    ethers.BigNumber.from(proposalId)
+                );
+                const state = await contract.state(ethers.BigNumber.from(proposalId));
 
-            setAgainstVotes(againstVotes.toString());
-            setForVotes(forVotes.toString());
-            setAbstainVotes(abstainVotes.toString());
-            setState(states[state]);
-
-            console.log(againstVotes.toString(), forVotes.toString(), abstainVotes.toString(), state.toString());
+                newProposals[idx].againstVotes = againstVotes.toString();
+                newProposals[idx].forVotes = forVotes.toString();
+                newProposals[idx].abstainVotes = abstainVotes.toString();
+                newProposals[idx].state = states[state];
+            }
+            setProposals(newProposals);
+            console.log("Get Proposal Details");
+            // setAgainstVotes(againstVotes.toString());
+            // setForVotes(forVotes.toString());
+            // setAbstainVotes(abstainVotes.toString());
+            // setState(states[state]);
         } catch (e) {
             console.error(e);
         }
@@ -76,50 +89,57 @@ function ProposalCard({ contract }) {
         }
     }, [contract]);
 
-    const proposalDetail = proposals.map(({ id, proposer, description }) => {
-        return (
-            <div className="card" key={id}>
-                <div className="content">
-                    <div className="header">{description}</div>
-                    <div
-                        className="meta"
-                        style={{ textOverflow: "ellipsis", width: "200px", overflow: "hidden", whiteSpace: "nowrap" }}
-                    >
-                        Proposal Id: {id}
-                    </div>
-                    <div>Status : {state}</div>
-                    <div className="description">
-                        <table className="ui celled table">
-                            <thead>
-                                <tr>
-                                    <th>For</th>
-                                    <th>Against</th>
-                                    <th>Abstain</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td data-label="for">{forVotes}</td>
-                                    <td data-label="against">{againstVotes}</td>
-                                    <td data-label="abstain">{abstainVotes}</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-                <div className="extra content">
-                    <div className="ui two buttons">
-                        <div className="ui basic green button" onClick={() => voteFor(id)}>
-                            For
+    const proposalDetail = proposals.map(
+        ({ id, proposer, description, againstVotes, forVotes, abstainVotes, state }) => {
+            return (
+                <div className="card" key={id}>
+                    <div className="content">
+                        <div className="header">{description}</div>
+                        <div
+                            className="meta"
+                            style={{
+                                textOverflow: "ellipsis",
+                                width: "200px",
+                                overflow: "hidden",
+                                whiteSpace: "nowrap",
+                            }}
+                        >
+                            Proposal Id: {id}
                         </div>
-                        <div className="ui basic red button" onClick={() => voteAgainst(id)}>
-                            Against
+                        <div>Status : {state}</div>
+                        <div className="description">
+                            <table className="ui celled table">
+                                <thead>
+                                    <tr>
+                                        <th>For</th>
+                                        <th>Against</th>
+                                        <th>Abstain</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td data-label="for">{forVotes}</td>
+                                        <td data-label="against">{againstVotes}</td>
+                                        <td data-label="abstain">{abstainVotes}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
                         </div>
                     </div>
+                    <div className="extra content">
+                        <div className="ui two buttons">
+                            <div className="ui basic green button" onClick={() => voteFor(id)}>
+                                For
+                            </div>
+                            <div className="ui basic red button" onClick={() => voteAgainst(id)}>
+                                Against
+                            </div>
+                        </div>
+                    </div>
                 </div>
-            </div>
-        );
-    });
+            );
+        }
+    );
 
     return (
         <div>
