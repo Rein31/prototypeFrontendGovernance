@@ -2,8 +2,6 @@ import React, { useEffect, useState } from "react";
 
 import { ethers } from "ethers";
 
-const abi = require("../abi/MyGovernor.json");
-
 const states = {
     0: "Pending",
     1: "Active",
@@ -28,27 +26,22 @@ const proposals = [
     // },
 ];
 
-function ProposalCard() {
+function ProposalCard({ contract }) {
     const [againstVotes, setAgainstVotes] = useState(0);
     const [forVotes, setForVotes] = useState(0);
     const [abstainVotes, setAbstainVotes] = useState(0);
     const [state, setState] = useState("");
 
-    let contract_address = "0x85094B1936bD7287C9444FaA09dCa0B257993832";
-    let api_key = "27f016de92b44287880cb460930b8151";
+    const proposalId = "44782053061302158253479573181125706781099996506491438126989206048620935604903";
 
-    let provider = new ethers.providers.InfuraProvider("goerli", api_key);
+    console.log(contract);
 
-    const governance_contract = new ethers.Contract(contract_address, abi["abi"], provider);
-
-    console.log(governance_contract);
-
-    async function getProposalDetails(id) {
+    async function getProposalDetails() {
         try {
-            const { againstVotes, forVotes, abstainVotes } = await governance_contract.proposalVotes(
-                ethers.BigNumber.from(id)
+            const { againstVotes, forVotes, abstainVotes } = await contract.proposalVotes(
+                ethers.BigNumber.from(proposalId)
             );
-            const state = await governance_contract.state(ethers.BigNumber.from(id));
+            const state = await contract.state(ethers.BigNumber.from(proposalId));
 
             setAgainstVotes(againstVotes.toString());
             setForVotes(forVotes.toString());
@@ -63,7 +56,7 @@ function ProposalCard() {
 
     async function voteFor(id) {
         try {
-            await governance_contract.castVote(ethers.BigNumber.from(id), 1);
+            await contract.castVote(ethers.BigNumber.from(id), 1);
         } catch (e) {
             console.error(e);
         }
@@ -71,19 +64,19 @@ function ProposalCard() {
 
     async function voteAgainst(id) {
         try {
-            await governance_contract.castVote(ethers.BigNumber.from(id), 0);
+            await contract.castVote(ethers.BigNumber.from(id), 0);
         } catch (e) {
             console.error(e);
         }
     }
 
     useEffect(() => {
-        if (governance_contract) {
+        if (contract) {
+            getProposalDetails();
         }
-    }, [state]);
+    }, [contract]);
 
     const proposalDetail = proposals.map(({ id, proposer, description }) => {
-        getProposalDetails(id);
         return (
             <div className="card" key={id}>
                 <div className="content">

@@ -1,17 +1,25 @@
+import React, { useState } from "react";
+
 import Navbar from "./components/Navbar";
 import ProposalCard from "./components/ProposalCard";
-import React from "react";
 import { ethers } from "ethers";
 
-let provider = new ethers.providers.Web3Provider(window.ethereum);
-let signer;
+const abi = require("./abi/MyGovernor.json");
 
 export default function App() {
+    const [contract, setContract] = useState();
+
     const connectMetamask = async () => {
+        const provider = new ethers.providers.Web3Provider(window.ethereum);
         // metamask requires requesting a permission to connect users account
         await provider.send("eth_requestAccounts", []);
+        const signer = await provider.getSigner();
 
-        signer = await provider.getSigner();
+        const contract_address = "0x85094B1936bD7287C9444FaA09dCa0B257993832";
+
+        const governance_contract = new ethers.Contract(contract_address, abi["abi"], signer);
+
+        setContract(governance_contract);
 
         console.log("Account Address : ", await signer.getAddress());
     };
@@ -20,7 +28,7 @@ export default function App() {
         <div>
             <Navbar connectMetamask={connectMetamask} />
             <div className="ui main container">
-                <ProposalCard />
+                <ProposalCard contract={contract} />
             </div>
         </div>
     );
