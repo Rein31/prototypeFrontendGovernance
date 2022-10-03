@@ -1,25 +1,29 @@
-import logo from './logo.svg';
-import './App.css';
+import React from 'react'
+import Navbar from './components/Navbar'
+import ProposalCard from './components/ProposalCard'
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+import { ethers } from 'ethers'
+
+let provider = new ethers.providers.Web3Provider(window.ethereum)
+let signer
+
+export default function App() {
+
+  const connectMetamask = async () => {
+    // metamask requires requesting a permission to connect users account
+    await provider.send('eth_requestAccounts', [])
+  
+    signer = await provider.getSigner()
+  
+    console.log('Account Address : ', await signer.getAddress())
+  }
+
+	return (
+		<div>
+			<Navbar connectMetamask={connectMetamask} />
+			<div className='ui main container'>
+				<ProposalCard />
+			</div>
+		</div>
+	)
 }
-
-export default App;
