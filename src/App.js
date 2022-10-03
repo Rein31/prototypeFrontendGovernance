@@ -2,6 +2,7 @@ import React, { useState } from "react";
 
 import Navbar from "./components/Navbar";
 import ProposalCard from "./components/ProposalCard";
+import ProposalForm from "./components/ProposalForm";
 import { ethers } from "ethers";
 
 const abi = require("./abi/MyGovernor.json");
@@ -25,9 +26,10 @@ export default function App() {
     };
 
     return (
-        <div>
+        <div className="ui main container">
             <Navbar connectMetamask={connectMetamask} />
-            <div className="ui main container">
+            <div className="ui sixteen column grid">
+                <ProposalForm />
                 <ProposalCard contract={contract} />
             </div>
         </div>

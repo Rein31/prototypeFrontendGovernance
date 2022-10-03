@@ -23,21 +23,10 @@ const initialProposals = [
         abstainVotes: "0",
         state: "Loading...",
     },
-    // {
-    //     id: 2,
-    //     proposer: "Bramsurya",
-    //     description: "Should we mint a token?",
-    // },
 ];
 
 function ProposalCard({ contract }) {
-    // const [againstVotes, setAgainstVotes] = useState(0);
-    // const [forVotes, setForVotes] = useState(0);
-    // const [abstainVotes, setAbstainVotes] = useState(0);
-    // const [state, setState] = useState("");
     const [proposals, setProposals] = useState(initialProposals);
-
-    // const proposalId = "44782053061302158253479573181125706781099996506491438126989206048620935604903";
 
     console.log(contract);
 
@@ -58,10 +47,6 @@ function ProposalCard({ contract }) {
             }
             setProposals(newProposals);
             console.log("Get Proposal Details");
-            // setAgainstVotes(againstVotes.toString());
-            // setForVotes(forVotes.toString());
-            // setAbstainVotes(abstainVotes.toString());
-            // setState(states[state]);
         } catch (e) {
             console.error(e);
         }
@@ -99,7 +84,6 @@ function ProposalCard({ contract }) {
                             className="meta"
                             style={{
                                 textOverflow: "ellipsis",
-                                width: "200px",
                                 overflow: "hidden",
                                 whiteSpace: "nowrap",
                             }}
@@ -108,7 +92,7 @@ function ProposalCard({ contract }) {
                         </div>
                         <div>Status : {state}</div>
                         <div className="description">
-                            <table className="ui celled table">
+                            <table className="ui fixed table">
                                 <thead>
                                     <tr>
                                         <th>For</th>
