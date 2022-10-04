@@ -2,10 +2,9 @@ import React, { useEffect, useState } from "react";
 
 import { ethers } from "ethers";
 
-function ProposalCard({ contract, states, proposals, setProposals }) {
-    console.log(contract);
-
+function ProposalCard({ contract, states, proposals, setProposals, loading }) {
     async function getProposalDetails() {
+        console.log("Get Proposal Details");
         try {
             const newProposals = [...proposals];
             for (let idx in newProposals) {
@@ -21,7 +20,6 @@ function ProposalCard({ contract, states, proposals, setProposals }) {
                 newProposals[idx].state = states[state];
             }
             setProposals(newProposals);
-            console.log("Get Proposal Details");
         } catch (e) {
             console.error(e);
         }
@@ -47,7 +45,7 @@ function ProposalCard({ contract, states, proposals, setProposals }) {
         if (contract) {
             getProposalDetails();
         }
-    }, [contract]);
+    }, [contract, loading]);
 
     const proposalDetail = proposals.map(
         ({ id, proposer, description, againstVotes, forVotes, abstainVotes, state }) => {

@@ -7,6 +7,7 @@ import ProposalForm from "./components/ProposalForm";
 import { ethers } from "ethers";
 
 const abi = require("./abi/MyGovernor.json");
+const tokenAbi = require("./abi/Token.json");
 
 const states = {
     0: "Pending",
@@ -33,13 +34,15 @@ const initialProposals = [
 
 export default function App() {
     const [contract, setContract] = useState();
+    const [provider, setProvider] = useState();
     const [proposalDesc, setProposalDesc] = useState("");
     const [proposals, setProposals] = useState(initialProposals);
+    const [loading, setLoading] = useState(false);
 
-    const token_address = "";
-    const iface = new Interface(abi["abi"]);
+    const token_address = "0x912A80A5A5747bCF41E75Fdf4Fe74cC41A4739ef";
+    const iface = new Interface(tokenAbi["abi"]);
 
-    const connectMetamask = async () => {
+    async function connectMetamask() {
         const provider = new ethers.providers.Web3Provider(window.ethereum);
         // metamask requires requesting a permission to connect users account
         await provider.send("eth_requestAccounts", []);
@@ -49,34 +52,46 @@ export default function App() {
 
         const governance_contract = new ethers.Contract(contract_address, abi["abi"], signer);
 
+        setProvider(provider);
         setContract(governance_contract);
 
         console.log("Account Address : ", await signer.getAddress());
-    };
+    }
 
-    const createProposal = async () => {
-        const encodedFunc = iface.encodeFunctionData("mint", [
-            "0x3300e4565046f33661A2b03BF182be9a0CAC1A05",
-            parseEther("10.0"),
-        ]);
-        const tx = await contract.propose([token_address], [0], [encodedFunc], proposalDesc);
-        const proposalId = tx.logs[0].args.proposalId;
+    async function createProposal(e) {
+        e.preventDefault();
+        console.log("Create Proposal");
+        if (contract) {
+            try {
+                setLoading(true);
 
-        let newProposal = {
-            id: proposalId.toString(),
-            description: proposalDesc,
-            againstVotes: "0",
-            forVotes: "0",
-            abstainVotes: "0",
-            state: "Loading...",
-        };
+                const encodedFunc = iface.encodeFunctionData("mint", [
+                    "0x3300e4565046f33661A2b03BF182be9a0CAC1A05",
+                    parseEther("10.0"),
+                ]);
+                const tx = await contract.propose([token_address], [0], [encodedFunc], proposalDesc);
+                const receipt = await tx.wait();
+                console.log(receipt);
 
-        setProposals((proposals) => [...proposals, newProposal]);
-    };
+                setLoading(false);
 
-    useEffect(() => {
-        console.log(proposalDesc);
-    }, [proposalDesc]);
+                const proposalId = receipt.events[0].args.proposalId;
+
+                let newProposal = {
+                    id: proposalId.toString(),
+                    description: proposalDesc,
+                    againstVotes: "0",
+                    forVotes: "0",
+                    abstainVotes: "0",
+                    state: "Loading...",
+                };
+
+                setProposals((proposals) => [...proposals, newProposal]);
+            } catch (e) {
+                console.error(e);
+            }
+        }
+    }
 
     return (
         <div className="ui container">
@@ -87,7 +102,13 @@ export default function App() {
                     proposalDesc={proposalDesc}
                     setProposalDesc={setProposalDesc}
                 />
-                <ProposalCard contract={contract} states={states} proposals={proposals} setProposals={setProposals} />
+                <ProposalCard
+                    contract={contract}
+                    states={states}
+                    proposals={proposals}
+                    setProposals={setProposals}
+                    loading={loading}
+                />
             </div>
         </div>
     );
