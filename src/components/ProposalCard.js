@@ -2,32 +2,7 @@ import React, { useEffect, useState } from "react";
 
 import { ethers } from "ethers";
 
-const states = {
-    0: "Pending",
-    1: "Active",
-    2: "Canceled",
-    3: "Defeated",
-    4: "Succeeded",
-    5: "Queued",
-    6: "Expired",
-    7: "Executed",
-};
-
-const initialProposals = [
-    {
-        id: "44782053061302158253479573181125706781099996506491438126989206048620935604903",
-        proposer: "Bramsurya",
-        description: "Should we make a new motorcycle?",
-        againstVotes: "0",
-        forVotes: "0",
-        abstainVotes: "0",
-        state: "Loading...",
-    },
-];
-
-function ProposalCard({ contract }) {
-    const [proposals, setProposals] = useState(initialProposals);
-
+function ProposalCard({ contract, states, proposals, setProposals }) {
     console.log(contract);
 
     async function getProposalDetails() {
